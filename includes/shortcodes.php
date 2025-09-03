@@ -780,7 +780,10 @@ function am_chat_options_shortcode(){
       <option value="0">Chips Off</option>
     </select>
 
-    <input type="text" id="am-chat-muted-<?php echo esc_attr($uid); ?>" placeholder="Mute words, comma separated" />
+    <div class="am-tag-input" id="am-chat-muted-<?php echo esc_attr($uid); ?>">
+      <input type="text" id="am-chat-muted-input-<?php echo esc_attr($uid); ?>" placeholder="Mute words" />
+      <div class="am-tag-preview"></div>
+    </div>
 
     <button type="button" id="am-chat-save-<?php echo esc_attr($uid); ?>">Save</button>
     <div class="am-chat-toast" id="am-chat-toast-<?php echo esc_attr($uid); ?>" style="display:none">Saved</div>
@@ -790,9 +793,54 @@ function am_chat_options_shortcode(){
     const toneSel  = document.getElementById('am-chat-tone-<?php echo esc_attr($uid); ?>');
     const lenSel   = document.getElementById('am-chat-length-<?php echo esc_attr($uid); ?>');
     const chipsSel = document.getElementById('am-chat-chips-<?php echo esc_attr($uid); ?>');
-    const muteInp  = document.getElementById('am-chat-muted-<?php echo esc_attr($uid); ?>');
+    const muteWrap = document.getElementById('am-chat-muted-<?php echo esc_attr($uid); ?>');
+    const muteInp  = document.getElementById('am-chat-muted-input-<?php echo esc_attr($uid); ?>');
+    const preview  = muteWrap ? muteWrap.querySelector('.am-tag-preview') : null;
     const saveBtn  = document.getElementById('am-chat-save-<?php echo esc_attr($uid); ?>');
     const toast    = document.getElementById('am-chat-toast-<?php echo esc_attr($uid); ?>');
+    let muteTags = [];
+
+    function renderPreview(){
+      if(!preview)return;
+      const val = muteInp.value.trim();
+      if(val){preview.textContent = val; preview.style.display='inline-block';}
+      else{preview.style.display='none';}
+    }
+    function addMuteTag(t){
+      t = t.trim();
+      if(!t || muteTags.includes(t)) return;
+      const chip=document.createElement('span');
+      chip.className='am-tag';
+      chip.textContent=t;
+      const x=document.createElement('button');
+      x.type='button';
+      x.innerHTML='&times;';
+      x.addEventListener('click',()=>{
+        muteTags = muteTags.filter(v=>v!==t);
+        chip.remove();
+        renderPreview();
+      });
+      chip.appendChild(x);
+      muteWrap.insertBefore(chip,muteInp);
+      muteTags.push(t);
+      muteInp.value='';
+      renderPreview();
+    }
+    function removeLastTag(){
+      const last=muteWrap.querySelector('.am-tag:last-of-type');
+      if(last){const txt=last.firstChild.textContent;muteTags=muteTags.filter(v=>v!==txt);last.remove();}
+    }
+    muteInp && muteInp.addEventListener('input',renderPreview);
+    muteInp && muteInp.addEventListener('keydown',e=>{
+      if((e.key==='Enter'||e.key===',') && muteInp.value.trim()){
+        e.preventDefault();
+        addMuteTag(muteInp.value);
+      }else if(e.key==='Backspace' && !muteInp.value && muteTags.length){
+        e.preventDefault();
+        removeLastTag();
+      }
+    });
+    preview && preview.addEventListener('click',()=>{if(muteInp.value.trim()) addMuteTag(muteInp.value);});
     const params  = new URLSearchParams(location.search);
     const agent   = params.get('agent_id') || '0';
     const key     = `amChatOpts-agent-${agent}`;
@@ -804,7 +852,7 @@ function am_chat_options_shortcode(){
         tone: toneSel ? toneSel.value : '',
         length: lenSel ? lenSel.value : '',
         chips: chipsSel ? chipsSel.value : '1',
-        muted: muteInp ? muteInp.value : ''
+        muted: muteTags.join(',')
       };
       try { localStorage.setItem(key, JSON.stringify(opts)); } catch(_){ }
       window.AM_CHAT_OPTS[key] = opts;
@@ -819,7 +867,9 @@ function am_chat_options_shortcode(){
     if (toneSel && stored.tone) toneSel.value = stored.tone;
     if (lenSel && stored.length) lenSel.value = stored.length;
     if (chipsSel) chipsSel.value = stored.chips !== undefined ? String(stored.chips) : '1';
-    if (muteInp && stored.muted) muteInp.value = stored.muted;
+    if (stored.muted){
+      stored.muted.split(',').forEach(t=>{if(t.trim()) addMuteTag(t.trim());});
+    }
     window.AM_CHAT_OPTS[key] = stored;
 
     saveBtn && saveBtn.addEventListener('click', save);
