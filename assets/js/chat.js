@@ -1,54 +1,5 @@
 (function(){if(window.__AM_CHAT_INIT__)return;window.__AM_CHAT_INIT__=!0;if(typeof window.AM_AUTO_AUDIO!=='boolean')window.AM_AUTO_AUDIO=!0;document.querySelectorAll('.openai-chat-container').forEach((root)=>{if(root.__AM_INIT__)return;root.__AM_INIT__=!0;const scrollerEl=root;const messagesEl=root.querySelector('.openai-messages')||root;const form=root.querySelector('#openai-chat-form');const input=root.querySelector('#openai-message-input');const voiceBtn=root.querySelector('#openai-voice-btn');if(voiceBtn)voiceBtn.setAttribute('type','button');const disclaimer=root.querySelector('.am-coach-note');if(disclaimer){const toggle=disclaimer.querySelector('.am-coach-toggle');if(toggle){toggle.addEventListener('click',()=>{disclaimer.classList.toggle('expanded');if(root.AM_positionScrollBtn)root.AM_positionScrollBtn();})}}
-const tags=[];
-let addTag=null,clearTags=null,getFullText=null;
-if(input){
-  const wrap=document.createElement('div');
-  wrap.className='am-tag-input';
-  input.parentNode.insertBefore(wrap,input);
-  wrap.appendChild(input);
-  addTag=(t)=>{
-    t=String(t||'').trim();
-    if(!t||tags.includes(t))return;
-    const chip=document.createElement('span');
-    chip.className='am-tag';
-    chip.textContent=t;
-    const x=document.createElement('button');
-    x.type='button';
-    x.innerHTML='&times;';
-    x.addEventListener('click',()=>{
-      const idx=tags.indexOf(t);
-      if(idx>-1)tags.splice(idx,1);
-      chip.remove();
-      if(toggleCallBtn)toggleCallBtn();
-    });
-    chip.appendChild(x);
-    wrap.insertBefore(chip,input);
-    tags.push(t);
-    if(toggleCallBtn)toggleCallBtn();
-  };
-  clearTags=()=>{
-    tags.length=0;
-    wrap.querySelectorAll('.am-tag').forEach((c)=>c.remove());
-    if(toggleCallBtn)toggleCallBtn();
-  };
-  getFullText=()=>{
-    const typed=(input.value||'').trim();
-    return [...tags,typed].filter(Boolean).join(' ');
-  };
-  root.AM_addTag=addTag;
-  input.addEventListener('keydown',(e)=>{
-    if((e.key===','||e.key==='Tab')&&input.value.trim()){
-      e.preventDefault();
-      addTag(input.value);
-      input.value='';
-      autosize();
-    }else if(e.key==='Backspace'&&!input.value&&tags.length){
-      e.preventDefault();
-      const last=wrap.querySelector('.am-tag:last-of-type');
-      if(last){tags.pop();last.remove();if(toggleCallBtn)toggleCallBtn()}
-    }
-  });
-}
+// Tag input functionality for the chat field has been removed.
 
 const agentId=parseInt(root.dataset.agentId||'0',10);let convUid=String(root.dataset.convUid||'');const assistantName=root.dataset.assistantName||'Assistant';const voiceId=(root.dataset.voiceId||'').trim();const welcome=root.dataset.welcome||'Hi!';const showFab=root.dataset.feedbackFab==='1';const avatarUrl=root.dataset.avatarUrl||'';const scrollIcon=root.dataset.scrollIcon||'https://wa4u.ai/wp-content/uploads/2025/08/nav-arrow-down.svg';let initialLoad=!0;function getChatKey(){return `amChatOpts-agent-${agentId}`}(function setupAutoScroll(){if(!scrollerEl)return;const EPS=64;let userLocked=!!convUid;function isNearBottom(){const remaining=scrollerEl.scrollHeight-scrollerEl.clientHeight-scrollerEl.scrollTop;return remaining<=EPS}
 function scrollToBottom(smooth=!0){scrollerEl.scrollTo({top:scrollerEl.scrollHeight,behavior:smooth?'smooth':'auto',})}
@@ -56,7 +7,7 @@ const goEndBtn=document.createElement('button');goEndBtn.type='button';goEndBtn.
 positionBtn();window.addEventListener('resize',positionBtn);goEndBtn.addEventListener('click',()=>{userLocked=!1;scrollToBottom(!0);updateState()});function updateState(){const scrollable=scrollerEl.scrollHeight>scrollerEl.clientHeight+EPS;userLocked=scrollable&&!isNearBottom();goEndBtn.style.display=userLocked?'flex':'none'}
 scrollerEl.addEventListener('scroll',updateState,{passive:!0});const mo=new MutationObserver((mutations)=>{let added=!1;for(const m of mutations){if(m.addedNodes&&m.addedNodes.length){added=!0;break}}
 if(!added)return;updateState()});mo.observe(messagesEl,{childList:!0,subtree:!0});root.AM_isNearBottom=isNearBottom;root.AM_scrollToBottom=scrollToBottom;root.AM_userLocked=()=>userLocked;root.AM_setUserLocked=(val)=>{userLocked=!!val};root.AM_scrollBtn=goEndBtn;root.AM_positionScrollBtn=positionBtn;userLocked=!1;updateState()})();appendBubble('ai',escapeHtml(welcome),!0,!0);initialLoad=!1;const sendBtn=root.querySelector('.send');const callBtn=root.querySelector('.am-voice-call-btn');let toggleCallBtn=null;const inputInner=root.querySelector('.openai-input-inner');const transcribingImg=root.dataset.transcribingImg||'https://wa4u.ai/wp-content/uploads/2025/09/transcribing.svg';let sttOverlay=null;if(inputInner){inputInner.style.position='relative';sttOverlay=document.createElement('div');sttOverlay.className='am-stt-loading';sttOverlay.style.display='none';inputInner.appendChild(sttOverlay)}
-if(input&&callBtn){toggleCallBtn=()=>{callBtn.style.display=(input.value.trim()||tags.length)?'none':''};input.addEventListener('input',toggleCallBtn);toggleCallBtn()}
+if(input&&callBtn){toggleCallBtn=()=>{callBtn.style.display=input.value.trim()?'none':''};input.addEventListener('input',toggleCallBtn);toggleCallBtn()}
 if(voiceBtn&&navigator.mediaDevices){let mediaRecorder=null;let chunks=[];let isRecording=!1;let micStream=null;function updateVoiceBtn(state){voiceBtn.classList.toggle('listening',state==='listening');voiceBtn.innerHTML=state==='listening'?'<img src="https://wa4u.ai/wp-content/uploads/2025/09/STOP-RECORDING.svg" alt="Stop" width="20" height="20">':'<img src="https://wa4u.ai/wp-content/uploads/2025/08/mic-on.svg" alt="Mic" width="20" height="20">';if(sendBtn)sendBtn.style.display=state==='listening'?'none':'';if(callBtn)callBtn.style.display=state==='listening'?'none':''}
 async function startRecording(){if(isRecording)return;chunks=[];if(micStream){try{micStream.getTracks().forEach((t)=>t.stop())}catch(_){}
 micStream=null}
@@ -72,7 +23,7 @@ voiceBtn.addEventListener('click',(e)=>{e.preventDefault();if(!isRecording)start
 if(convUid){fetch(window.AM_REST+'am/v1/history?conversation_uid='+encodeURIComponent(convUid),{credentials:'same-origin',headers:{'X-WP-Nonce':window.AM_NONCE},}).then((r)=>r.json()).then((j)=>{const items=(j&&j.items)?j.items:[];items.forEach((it)=>{const cleanedText=it.role==='user'?escapeHtml(String(it.content||'')):sanitizeReply(String(it.content||''));const wrap=appendBubble(it.role==='user'?'user':'ai',cleanedText,it.role!=='user',!0);if(it.role!=='user'){const mid=it.assistant_message_id||it.message_id||it.id;const row=wrap.querySelector('.am-feedback-row');if(row)addFeedbackButtons(row,stripHtml(cleanedText),mid);}})}).catch(()=>{})}
 const MAX_ROWS=6;function autosize(){input.style.height='auto';const lh=parseFloat(getComputedStyle(input).lineHeight)||20;const maxH=lh*MAX_ROWS;input.style.height=Math.min(input.scrollHeight,maxH)+'px';input.style.overflowY=input.scrollHeight>maxH?'auto':'hidden'}
 input&&input.addEventListener('input',(e)=>{autosize();clearSuggestions(!0)});input&&autosize();input&&input.addEventListener('keydown',(e)=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(form){if(form.requestSubmit)form.requestSubmit();else form.dispatchEvent(new Event('submit',{cancelable:!0}))}}});if(form&&!form.__amBound){form.addEventListener('submit',onSubmit);form.__amBound=!0}
-async function onSubmit(e){e.preventDefault();clearSuggestions();const text=(getFullText?getFullText():(input.value||'')).trim();if(!text)return;appendBubble('user',escapeHtml(text));if(root.AM_setUserLocked)root.AM_setUserLocked(!1);input.value='';clearTags&&clearTags();autosize();if(toggleCallBtn)toggleCallBtn();const typing=appendBubble('ai','<div class="typing-indicator"><span></span><span></span><span></span></div>',!1);try{const payload={agent_id:agentId,message:text,conversation_uid:convUid||'',options:(window.AM_CHAT_OPTS&&window.AM_CHAT_OPTS[getChatKey()])||{}};console.log('Sending request:',{url:window.AM_REST+'am/v1/chat',payload});const resp=await fetch(window.AM_REST+'am/v1/chat',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-WP-Nonce':window.AM_NONCE},credentials:'same-origin',body:JSON.stringify(payload),});console.log('Response headers:',{contentType:resp.headers.get('content-type'),status:resp.status});const rawText=await resp.text();console.log('Raw response:',rawText);let data;try{data=JSON.parse(rawText)}catch(jsonError){console.error('JSON Parse Error:',jsonError);throw new Error('Server returned invalid JSON response')}
+async function onSubmit(e){e.preventDefault();clearSuggestions();const text=(input.value||'').trim();if(!text)return;appendBubble('user',escapeHtml(text));if(root.AM_setUserLocked)root.AM_setUserLocked(!1);input.value='';autosize();if(toggleCallBtn)toggleCallBtn();const typing=appendBubble('ai','<div class="typing-indicator"><span></span><span></span><span></span></div>',!1);try{const payload={agent_id:agentId,message:text,conversation_uid:convUid||'',options:(window.AM_CHAT_OPTS&&window.AM_CHAT_OPTS[getChatKey()])||{}};console.log('Sending request:',{url:window.AM_REST+'am/v1/chat',payload});const resp=await fetch(window.AM_REST+'am/v1/chat',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-WP-Nonce':window.AM_NONCE},credentials:'same-origin',body:JSON.stringify(payload),});console.log('Response headers:',{contentType:resp.headers.get('content-type'),status:resp.status});const rawText=await resp.text();console.log('Raw response:',rawText);let data;try{data=JSON.parse(rawText)}catch(jsonError){console.error('JSON Parse Error:',jsonError);throw new Error('Server returned invalid JSON response')}
 if(!resp.ok){throw new Error(data?.error||`HTTP ${resp.status}`)}
 if(data&&data.conversation_uid){convUid=data.conversation_uid;const url=new URL(window.location.href);url.searchParams.set('agent_id',String(agentId));url.searchParams.set('cid',String(convUid));window.history.replaceState({},'',url.toString());window.dispatchEvent(new CustomEvent('am:conversation-updated',{detail:{cid:convUid,agentId,title:text.slice(0,60),avatarUrl,assistantName}}))}
 const rawReply=applyMutedWords(String(data.reply||''));const replyHtml=sanitizeReply(rawReply);const replyText=stripHtml(replyHtml);addPlayToLastAIBubble(replyText);const lastPlayBtn=typing.querySelector('.play-btn');if(lastPlayBtn&&window.AM_AUTO_AUDIO)lastPlayBtn.click();const bubbleEl=typing.querySelector('.bubble');await typeInto(bubbleEl,escapeHtml(replyText));bubbleEl.innerHTML=replyHtml;const sugs=extractSuggestions(data.suggestions,rawReply,text);showSuggestions(sugs,typing);
@@ -107,9 +58,9 @@ function addFeedbackButtons(row,replyText,msgId){if(!row||row.__fbMounted)return
 if(msgId){const saved=localStorage.getItem(`feedback-${msgId}`);if(saved==='up'||saved==='down')setActive(saved);}
 async function send(val){if(!convUid||!msgId)return!1;try{const payload={conversation_uid:convUid,message_id:msgId,value:val,text:replyText||'',agent_id:agentId||0};const r=await fetch(window.AM_REST+'am/v1/feedback',{method:'POST',headers:{'Content-Type':'application/json','X-WP-Nonce':window.AM_NONCE},credentials:'same-origin',body:JSON.stringify(payload),});const j=await r.json();if(!r.ok)throw new Error(j?.error||'Error');localStorage.setItem(`feedback-${msgId}`,val);return!0}catch(err){console.error('Feedback error:',err);return!1}}
 up.addEventListener('click',async()=>{if(up.disabled||dn.disabled)return;up.disabled=dn.disabled=!0;const ok=await send('up');if(ok)setActive('up');up.disabled=dn.disabled=!1});dn.addEventListener('click',async()=>{if(up.disabled||dn.disabled)return;up.disabled=dn.disabled=!0;const ok=await send('down');if(ok)setActive('down');up.disabled=dn.disabled=!1})}
-async function typeInto(el,html,opts={}){const delayMs=typeof opts.delayMs==='number'?opts.delayMs:12;const charsPerTick=typeof opts.charsPerTick==='number'?opts.charsPerTick:2;const safe=String(html||'').replace(/\n/g,'<br>');const tokens=safe.split(/(<br>)/g);el.innerHTML='';let textNode=document.createTextNode('');el.appendChild(textNode);let skip=!1;const skipHandler=()=>{skip=!0};el.addEventListener('click',skipHandler,{once:!0});for(const t of tokens){if(t==='<br>'){el.appendChild(document.createElement('br'));textNode=document.createTextNode('');el.appendChild(textNode);continue}
+async function typeInto(el,html,opts={}){const delayMs=typeof opts.delayMs==='number'?opts.delayMs:12;const charsPerTick=typeof opts.charsPerTick==='number'?opts.charsPerTick:2;const safe=String(html||'').replace(/\n/g,'<br>');const tokens=safe.split(/(<br>)/g);el.innerHTML='';let textNode=document.createTextNode('');el.appendChild(textNode);let skip=!1;const skipHandler=()=>{skip=!0};el.addEventListener('click',skipHandler,{once:!0});for(const t of tokens){if(t==='<br>'){el.appendChild(document.createElement('br'));textNode=document.createTextNode('');el.appendChild(textNode);if(root.AM_scrollToBottom)root.AM_scrollToBottom();continue}
 let i=0;while(i<t.length){if(skip){textNode.nodeValue+=t.slice(i);i=t.length;break}
-const next=t.slice(i,i+charsPerTick);textNode.nodeValue+=next;i+=next.length;await new Promise((r)=>setTimeout(r,delayMs))}}
+const next=t.slice(i,i+charsPerTick);textNode.nodeValue+=next;if(root.AM_scrollToBottom)root.AM_scrollToBottom();i+=next.length;await new Promise((r)=>setTimeout(r,delayMs))}}
 try{el.removeEventListener('click',skipHandler,{once:!0})}catch(_){}}
 function addPlayToLastAIBubble(text){const last=[...messagesEl.querySelectorAll('.openai-bubble.ai .avatar')].pop();if(!last)return;if(last.querySelector('.play-btn')){last.querySelector('.play-btn').setAttribute('data-text',text);return}
 const btn=document.createElement('button');btn.type='button';btn.className='play-btn';btn.setAttribute('data-text',text);btn.setAttribute('aria-label','Play voice');btn.innerHTML='<img src="https://wa4u.ai/wp-content/uploads/2025/08/play.svg" alt="Play" width="20" height="20">';last.appendChild(btn)}
@@ -124,7 +75,7 @@ if(ch==='['){if(depth===0)start=i;depth++;continue}
 if(ch===']'){if(depth>0){depth--;if(depth===0&&start!==-1){last={start,end:i}}}}}
 return last}
 let currentSugRow=null;function clearSuggestions(anim){if(currentSugRow){if(anim){currentSugRow.classList.add('fade');setTimeout(()=>currentSugRow&&currentSugRow.remove(),200)}else currentSugRow.remove();currentSugRow=null}}
-function showSuggestions(list,afterEl){const opts=(window.AM_CHAT_OPTS&&window.AM_CHAT_OPTS[getChatKey()])||{};if(!list||!list.length||opts.chips===false||opts.chips==='0'){clearSuggestions();return}clearSuggestions();const row=document.createElement('div');row.className='am-suggestions';list.forEach((s)=>{const b=document.createElement('button');b.type='button';b.className='am-suggestion-chip';b.textContent=s;b.addEventListener('click',()=>{if(addTag)addTag(s);clearSuggestions(!0);input.focus();autosize();if(toggleCallBtn)toggleCallBtn()});row.appendChild(b)});afterEl.after(row);currentSugRow=row}
+function showSuggestions(list,afterEl){const opts=(window.AM_CHAT_OPTS&&window.AM_CHAT_OPTS[getChatKey()])||{};if(!list||!list.length||opts.chips===false||opts.chips==='0'){clearSuggestions();return}clearSuggestions();const row=document.createElement('div');row.className='am-suggestions';list.forEach((s)=>{const b=document.createElement('button');b.type='button';b.className='am-suggestion-chip';b.textContent=s;b.addEventListener('click',()=>{const pre=input.value?input.value+' ':'';input.value=pre+s;clearSuggestions(!0);input.focus();autosize();if(toggleCallBtn)toggleCallBtn()});row.appendChild(b)});afterEl.after(row);currentSugRow=row}
 function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}
 function applyMutedWords(text){const opts=(window.AM_CHAT_OPTS&&window.AM_CHAT_OPTS[getChatKey()])||{};const words=String(opts.muted||'').split(',').map((w)=>w.trim()).filter(Boolean);if(!words.length)return text;let out=String(text||'');words.forEach((w)=>{out=out.replace(new RegExp('\\b'+escapeRegExp(w)+'\\b','gi'),'***')});return out}
 function fallbackChips(reply,userText){const text=(reply+' '+(userText||'')).toLowerCase();const isEs=/[áéíóúñ¿¡]|(hola|cómo|estás|gracias|ayuda|cuéntame|siento|triste|ansioso|ansiedad|estrés|hambre|comida)/i.test(text);if(isEs){if(/triste|depre|solo|ansio|ansied|estres|estrés|preocup/i.test(text))return['Quiero hablar de eso','¿Qué puedo hacer ahora?','Dame un ejercicio rápido'];if(/hambre|comer|comida|dieta/i.test(text))return['Recomiéndame algo saludable','Ideas de snacks rápidos','Consejos para organizar comidas'];}else{if(/sad|down|anxious|anxiety|stress|worried/i.test(text))return["Let’s talk about it","What should I do now?","Give me a quick exercise"];if(/hungry|food|eat|diet/i.test(text))return['Suggest something healthy','Quick snack ideas','Tips to plan meals'];}return[]}

@@ -384,6 +384,9 @@
   gap: 8px;
   width: 100%;
   position: relative;
+  padding: 4px 8px;
+  border-radius: 30px;
+  background: #1e1d25;
 }
 
 .am-tag-input {
@@ -397,14 +400,15 @@
   border-radius: 30px;
   background: #1e1d25;
   width: 100%;
+  position: relative;
 }
 
-.am-tag-input textarea {
+.am-tag-input input {
   flex: 1;
   background: transparent;
   border: none;
   color: #fff;
-  resize: none;
+  outline: none;
 }
 
 .am-tag {
@@ -430,6 +434,29 @@
   font-size: 12px;
   line-height: 1;
   padding: 0;
+}
+
+#openai-message-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  resize: none;
+  outline: none;
+}
+
+.am-tag-preview {
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  margin-top: 4px;
+  background: #2e2b3d;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 14px;
+  display: none;
+  cursor: pointer;
 }
 
 .voice-btn.listening {
