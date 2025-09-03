@@ -8,6 +8,9 @@
 /* ============================
    LISTAS DE AGENTES Y CHATS
 ============================ */
+.openai-chat-container {
+  position: relative;
+}
 .am-agent-list,
 .am-chat-list {
   list-style: none;
@@ -241,6 +244,9 @@
   -ms-flex-wrap: wrap;
       flex-wrap: wrap;
   gap: 6px;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
 }
 
 .am-suggestions.fade {
@@ -249,10 +255,11 @@
 }
 
 .am-suggestion-chip {
-  border: 1px solid #e0e0e0;
+  border: none;
   border-radius: 999px;
   padding: 4px 10px;
-  background: #fafafa;
+  background-color: #f1f1f1;
+  color: #3A354E;
   cursor: pointer;
 }
 
