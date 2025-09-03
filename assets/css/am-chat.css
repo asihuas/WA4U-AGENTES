@@ -243,6 +243,11 @@
   gap: 6px;
 }
 
+.am-suggestions.fade {
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
 .am-suggestion-chip {
   border: 1px solid #e0e0e0;
   border-radius: 999px;
@@ -684,40 +689,24 @@ ul.am-agent-list li:first-child {
 /* Minimal chat customization options */
 .am-chat-options {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 8px;
-  padding: 10px;
-  background: #f7f7f8;
-  border-radius: 8px;
   margin-bottom: 10px;
-  max-width: 220px;
-}
-
-.am-chat-options label {
-  font-size: 13px;
-  color: #3A354E;
 }
 
 .am-chat-options select,
-.am-chat-options button {
-  font-size: 13px;
+.am-chat-options button,
+.am-chat-options input {
+  font-size: 15px;
+  padding: 6px 10px;
+  border-radius: 6px;
   border: none;
-  background: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
 }
 
 .am-chat-options button {
   background: #3A354E;
   color: #fff;
   cursor: pointer;
-}
-
-.am-chat-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .am-chat-info-avatar {

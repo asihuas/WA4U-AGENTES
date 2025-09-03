@@ -762,36 +762,37 @@ function am_chat_options_shortcode(){
   $name   = $agent_id ? get_the_title($agent_id) : '';
   ob_start(); ?>
   <div class="am-chat-options" id="am-chat-options-<?php echo esc_attr($uid); ?>">
-    <?php if($avatar || $name): ?>
-      <div class="am-chat-info">
-        <?php if($avatar): ?><img src="<?php echo esc_url($avatar); ?>" alt="<?php echo esc_attr($name); ?>" class="am-chat-info-avatar" /><?php endif; ?>
-        <?php if($name): ?><span class="am-chat-info-name"><?php echo esc_html($name); ?></span><?php endif; ?>
-      </div>
-    <?php endif; ?>
-    <label for="am-chat-tone-<?php echo esc_attr($uid); ?>">Tone:</label>
     <select id="am-chat-tone-<?php echo esc_attr($uid); ?>">
-      <option value="">Default</option>
+      <option value="">Tone: Default</option>
       <option value="friendly">Friendly</option>
       <option value="professional">Professional</option>
       <option value="humorous">Humorous</option>
     </select>
 
-    <label for="am-chat-length-<?php echo esc_attr($uid); ?>">Length:</label>
     <select id="am-chat-length-<?php echo esc_attr($uid); ?>">
-      <option value="">Default</option>
+      <option value="">Length: Default</option>
       <option value="concise">Concise</option>
       <option value="detailed">Detailed</option>
     </select>
+
+    <select id="am-chat-chips-<?php echo esc_attr($uid); ?>">
+      <option value="1">Chips On</option>
+      <option value="0">Chips Off</option>
+    </select>
+
+    <input type="text" id="am-chat-muted-<?php echo esc_attr($uid); ?>" placeholder="Mute words, comma separated" />
 
     <button type="button" id="am-chat-save-<?php echo esc_attr($uid); ?>">Save</button>
     <div class="am-chat-toast" id="am-chat-toast-<?php echo esc_attr($uid); ?>" style="display:none">Saved</div>
   </div>
   <script>
   (function(){
-    const toneSel = document.getElementById('am-chat-tone-<?php echo esc_attr($uid); ?>');
-    const lenSel  = document.getElementById('am-chat-length-<?php echo esc_attr($uid); ?>');
-    const saveBtn = document.getElementById('am-chat-save-<?php echo esc_attr($uid); ?>');
-    const toast   = document.getElementById('am-chat-toast-<?php echo esc_attr($uid); ?>');
+    const toneSel  = document.getElementById('am-chat-tone-<?php echo esc_attr($uid); ?>');
+    const lenSel   = document.getElementById('am-chat-length-<?php echo esc_attr($uid); ?>');
+    const chipsSel = document.getElementById('am-chat-chips-<?php echo esc_attr($uid); ?>');
+    const muteInp  = document.getElementById('am-chat-muted-<?php echo esc_attr($uid); ?>');
+    const saveBtn  = document.getElementById('am-chat-save-<?php echo esc_attr($uid); ?>');
+    const toast    = document.getElementById('am-chat-toast-<?php echo esc_attr($uid); ?>');
     const params  = new URLSearchParams(location.search);
     const agent   = params.get('agent_id') || '0';
     const key     = `amChatOpts-agent-${agent}`;
@@ -801,7 +802,9 @@ function am_chat_options_shortcode(){
     function save(){
       const opts = {
         tone: toneSel ? toneSel.value : '',
-        length: lenSel ? lenSel.value : ''
+        length: lenSel ? lenSel.value : '',
+        chips: chipsSel ? chipsSel.value : '1',
+        muted: muteInp ? muteInp.value : ''
       };
       try { localStorage.setItem(key, JSON.stringify(opts)); } catch(_){ }
       window.AM_CHAT_OPTS[key] = opts;
@@ -815,6 +818,8 @@ function am_chat_options_shortcode(){
     try { stored = JSON.parse(localStorage.getItem(key) || '{}'); } catch(_){ stored = {}; }
     if (toneSel && stored.tone) toneSel.value = stored.tone;
     if (lenSel && stored.length) lenSel.value = stored.length;
+    if (chipsSel) chipsSel.value = stored.chips !== undefined ? String(stored.chips) : '1';
+    if (muteInp && stored.muted) muteInp.value = stored.muted;
     window.AM_CHAT_OPTS[key] = stored;
 
     saveBtn && saveBtn.addEventListener('click', save);
